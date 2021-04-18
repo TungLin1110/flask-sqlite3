@@ -1,2 +1,2 @@
-from catalog import getApp
+from flaskr import getApp
 app = getApp()
