@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+{% block header %}
+  <h1>{% block title %}Posts{% endblock %}</h1>
+  {% if g.user %}
+    <a class="action" href="{{ url_for('blog.create') }}">New</a>
+  {% endif %}
+{% endblock %}
+
+{% block content %}
+  {% for post in posts %}
+    <article class="post">
+      <header>
+            <div class="left">
+                <div>
+                <div ><img src="data:;base64,{{img[loop.index-1]}}" width="100" height="100"><div>
+                <div class="left">by {{ post['username'] }}</div>
+                </div>
+            </div>
+            <div class="right"><div>{{ post['body'] }}</div></div>
+            
+        {% if g.user['id'] == post['author_id'] %}
+          <!--a class="action" href="{{ url_for('blog.delete', id=post['id']) }}">Edit</a-->
+        <div class="delete">
+          <form action="{{ url_for('blog.delete', id=post['id']) }}" method="post">
+            <input class="danger" type="submit" value="Delete" onclick="return confirm('Are you sure?');">
+          </form>
+        </div>
+        {% endif %}
+      </header>
+      
+    </article>
+    {% if not loop.last %}
+      <hr>
+    {% endif %}
+  {% endfor %}
+{% endblock %}
