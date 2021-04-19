@@ -12,7 +12,6 @@ cookies = []
 @bp.route('/')
 def index():
     user_id = session.get('user_id')
-    # print(user_id)
     db = get_db()
     
     
@@ -24,7 +23,6 @@ def index():
 
             user_id = session.get('user_id')
             view_now = db.execute('SELECT * FROM user WHERE id = ?', (user_id,)).fetchone()
-            print(view_now)
             temp = view_now['view']
             temp += 1
             db.execute('UPDATE user SET view=? WHERE id = ?', (temp, user_id,))
@@ -40,5 +38,4 @@ def index():
     out = 0
     for iter in view_now:
         out += iter['view']
-    print(out)
     return render_template('home/home.html',total_view=out,user_view=temp)

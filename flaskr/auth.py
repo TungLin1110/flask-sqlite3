@@ -1,5 +1,6 @@
 import functools
-
+import requests
+import json
 from flask import (
     Blueprint, flash, g, redirect, render_template, request, session, url_for,Flask
 )
@@ -14,6 +15,12 @@ def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.')[-1].lower() in ALLOWED_EXTENSIONS
 
+def is_human(captcha_response):
+    secret = "6Ld3dbAaAAAAAAqxpxI4hvLV3euRbyrz1PTmMFGk"
+    payload = {'response':captcha_response, 'secret':secret}
+    response = requests.post("https://www.google.com/recaptcha/api/siteverify", payload)
+    response_text = json.loads(response.text)
+    return response_text['success']
 
 @bp.route('/register', methods=('GET', 'POST'))
 def register():
@@ -61,13 +68,30 @@ def register():
 @bp.route('/login', methods=('GET', 'POST'))
 def login():
     user_id = session.get('user_id')
+    sitekey = "6Ld3dbAaAAAAAGi3urIXD9DBhxWDWPnsOvn8XCXk" 
+
     if user_id is not None:
         return redirect(url_for('blog.index'))        
 
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
+        captcha_response = request.form['g-recaptcha-response']
+
         db = get_db()
+
+        if is_human(captcha_response):
+            # Process request here
+            error = "Detail submitted successfully."
+            print("success")
+        else:
+             # Log invalid attempts
+            error = "Sorry ! Bots are not allowed."
+            print("failed")
+            return redirect(url_for('auth.login'))
+
+
+
         error = None
         user = db.execute(
             'SELECT * FROM user WHERE username = ?', (username,)
@@ -82,10 +106,15 @@ def login():
             session.clear()
             session['user_id'] = user['id']
             return redirect(url_for('index'))
-
+        
         flash(error)
 
-    return render_template('auth/login.html')
+        
+
+
+        
+
+    return render_template('auth/login.html',sitekey=sitekey)
 
 @bp.before_app_request
 def load_logged_in_user():
