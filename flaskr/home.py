@@ -18,8 +18,8 @@ def index():
     
     if user_id is not None:
         if request.cookies.get('session') not in cookies:
-            counter.value += 1
-            out = counter.value
+            # counter.value += 1
+            # out = counter.value
             cookies.append(request.cookies.get('session'))
 
             user_id = session.get('user_id')
@@ -31,10 +31,14 @@ def index():
             db.commit()
         else:
             view_now = db.execute('SELECT * FROM user WHERE id = ?', (user_id,)).fetchone()
-            out = counter.value
+            # out = counter.value
             temp = view_now['view']
     else:
-        out = counter.value
+        # out = counter.value
         temp = 0
-
+    view_now = db.execute('SELECT * FROM user').fetchall()
+    out = 0
+    for iter in view_now:
+        out += iter['view']
+    print(out)
     return render_template('home/home.html',total_view=out,user_view=temp)
